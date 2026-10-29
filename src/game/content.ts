@@ -586,3 +586,11 @@ export function resolve(s: GameState, verb: string, a: Ref, b?: Ref): Step[] {
 
 /** Hotspots that can start a Give (valid recipients). */
 export const GIVE_TARGETS = new Set(['cv_cutie', 'qt_donovan']);
+
+export const OPENING: Step[] = [
+  say('donovan_ic', 'Greg, the electron storm reaches the beam in a few hours, and Cutie still will not take orders from us.'),
+  say('powell', 'He runs the station flawlessly and calls the converter "the Master". Fine. I just want proof he can ride out the storm.'),
+  say('donovan_ic', 'Start by proving we made him. Build a robot where he can watch.'),
+  say('powell', 'The parts should be around here somewhere.'),
+  objective(OBJECTIVES.assemble),
+];

@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#06070c" />
+  <title>REASON</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%2306070c'/%3E%3Crect x='3' y='3' width='10' height='10' fill='%23c8983a'/%3E%3Crect x='6' y='6' width='4' height='4' fill='%234bc8b0'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/src/ui/style.css" />
+</head>
+<body>
+  <div id="app" data-state="title">
+    <div id="stage">
+      <canvas id="world" width="320" height="180" aria-label="Game scene"></canvas>
+      <div id="labels" aria-hidden="true"></div>
+      <div id="toolbar">
+        <button id="btn-reveal" class="tool" aria-label="Reveal hotspots" aria-pressed="false" title="Reveal hotspots">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/></svg>
+        </button>
+        <button id="btn-hint" class="tool" aria-label="Ask Donovan for a hint" title="Hint">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9a3 3 0 1 1 4.6 2.5c-1 .7-1.6 1.2-1.6 2.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="18.3" r="1.5" fill="currentColor"/></svg>
+        </button>
+        <button id="btn-sound" class="tool" aria-label="Mute sound" aria-pressed="false" title="Sound">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9z" fill="currentColor"/><path class="waves" d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path class="slash" d="M16 9l6 6M22 9l-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+        </button>
+        <button id="btn-menu" class="tool" aria-label="Menu" title="Menu">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <button id="btn-back" hidden>&#9664; Back to the room</button>
+      <button id="btn-skip" hidden>Skip &#9654;&#9654;</button>
+      <div id="banner" hidden></div>
+      <div id="toast" role="status" aria-live="polite"></div>
+      <div id="fade"></div>
+    </div>
+
+    <div id="caption" role="log" aria-live="polite">
+      <div id="speaker"></div>
+      <div id="line"></div>
+      <div id="more" aria-hidden="true">&#9662;</div>
+    </div>
+
+    <div id="controls">
+      <div id="sentence-row">
+        <div id="sentence" aria-live="off"></div>
+        <button id="btn-cancel" hidden aria-label="Cancel the current command">Cancel</button>
+      </div>
+      <div id="panel">
+        <div id="verbs" role="toolbar" aria-label="Verbs">
+          <button data-verb="look">Look at</button>
+          <button data-verb="pickup">Pick up</button>
+          <button data-verb="use">Use</button>
+          <button data-verb="talk">Talk to</button>
+          <button data-verb="open">Open</button>
+          <button data-verb="give">Give</button>
+        </div>
+        <div id="inventory" role="list" aria-label="Inventory"></div>
+      </div>
+      <div id="choices" role="list" aria-label="Dialogue choices" hidden></div>
+    </div>
+
+    <section id="splash" class="overlay" hidden aria-label="Flickersoft presents"><canvas width="80" height="34"></canvas></section>
+
+    <section id="title" class="overlay">
+      <div class="title-art"></div>
+      <div class="title-box">
+        <h1>REASON</h1>
+        <p class="sub">A Flickersoft point-and-click adventure after Isaac Asimov&rsquo;s story</p>
+        <div class="title-actions">
+          <button id="btn-continue" class="primary" hidden>Continue</button>
+          <button id="btn-new" class="primary">Start</button>
+          <button id="btn-restart-title" hidden>Restart</button>
+        </div>
+        <ul class="howto">
+          <li><b>Tap the floor</b> to walk. <b>Tap an object</b> to look at it; doors take you through.</li>
+          <li>Pick a <b>verb</b>, then an object. Tap an inventory item to select it for <b>Use</b> or <b>Give</b>.</li>
+          <li><b>&#9673;</b> shows every hotspot. <b>?</b> asks Donovan for a hint.</li>
+          <li>Play with or without sound. About 5&ndash;10 minutes.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="menu" class="overlay" hidden>
+      <div class="sheet" role="dialog" aria-modal="true" aria-label="Menu">
+        <h2>Menu</h2>
+        <button id="m-sound">Sound: on</button>
+        <button id="m-motion">Reduced motion: off</button>
+        <button id="m-restart">Restart game</button>
+        <button id="m-title">Return to title</button>
+        <button id="m-close" class="primary">Resume</button>
+      </div>
+    </section>
+
+    <section id="credits" class="overlay" hidden>
+      <div class="credits-box">
+        <div id="credits-scroll">
+          <h2>REASON</h2>
+          <p class="small">A short adventure adapted from Isaac Asimov&rsquo;s story &ldquo;Reason&rdquo;.</p>
+          <p>A <b>Flickersoft</b> game.</p>
+          <p>Design, writing, pixel art, music motif and sound: original, made for this project.</p>
+          <p class="small">Inspired by the point-and-click adventures <i>Indiana Jones and the Fate of Atlantis</i>, <i>Day of the Tentacle</i> and <i>Maniac Mansion</i>. This game is an independent work and is not affiliated with or endorsed by LucasArts, Disney, or the Asimov estate.</p>
+          <p class="small">Every sound is synthesised in your browser. No audio, image or font files are borrowed.</p>
+          <p>Thank you for playing.</p>
+        </div>
+        <button id="btn-credits-done" class="primary">Return to title</button>
+      </div>
+    </section>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

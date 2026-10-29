@@ -366,3 +366,40 @@ export function botFrame(b: BotState): string[] { return toStrings(drawBot(b)); 
 export const BOT_ANCHOR = { ax: 17, ay: 45 };
 export const ICON_STRINGS: Record<string, string[]> = Object.fromEntries(Object.entries(ICONS).map(([k, v]) => [k, toStrings(v)]));
 void PALETTE; void TRANSPARENT;
+
+// ---------------------------------------------------------------- small world props
+export const PROPS: Record<string, string[]> = {};
+{
+  const screw = new Raster(18, 5);
+  screw.rect(0, 1, 5, 3, C.amber2); screw.rect(0, 1, 5, 1, C.amber3); screw.rect(5, 2, 12, 1, C.steel4); screw.rect(5, 1, 12, 1, C.steel5); screw.set(17, 2, C.steel3);
+  screw.outline(C.void0);
+  PROPS.screwdriver = toStrings(screw);
+
+  const mug = new Raster(10, 11);
+  mug.rect(1, 3, 6, 7, C.steel4); mug.rect(1, 3, 2, 7, C.steel3); mug.rect(1, 3, 6, 1, C.steel5); mug.rect(2, 4, 4, 2, C.amber0);
+  mug.set(7, 4, C.steel4); mug.set(8, 4, C.steel4); mug.set(8, 5, C.steel4); mug.set(8, 6, C.steel4); mug.set(7, 7, C.steel4);
+  mug.outline(C.void0);
+  PROPS.mug = toStrings(mug);
+
+  // opened parts drawer; variants by which parts remain
+  for (const [arm, mod] of [[true, true], [true, false], [false, true], [false, false]] as const) {
+    const d = new Raster(44, 20);
+    d.poly([[2, 0], [41, 0], [44, 19], [0, 19]], C.void1);
+    d.poly([[4, 1], [39, 1], [41, 16], [2, 16]], C.teal0);
+    d.dither(4, 1, 36, 15, C.teal0, C.void1, 0.4);
+    d.rect(0, 16, 44, 4, C.brass2); d.rect(0, 16, 44, 1, C.brass4); d.rect(0, 19, 44, 1, C.brass0);
+    d.rect(14, 17, 16, 2, C.void2);
+    if (arm) { d.rect(7, 6, 11, 6, C.steel3); d.rect(7, 6, 11, 1, C.steel5); d.rect(18, 7, 4, 4, C.brass3); d.rect(18, 7, 4, 1, C.brass4); d.rect(8, 11, 9, 1, C.steel1); d.rect(5, 7, 2, 4, C.amber1); d.set(5, 7, C.amber3); }
+    if (mod) { d.rect(24, 4, 13, 10, C.steel2); d.rect(24, 4, 13, 1, C.steel4); d.rect(26, 6, 9, 6, C.void1); d.rect(28, 7, 5, 4, C.teal2); d.rect(29, 8, 3, 2, C.teal4); for (let i = 0; i < 4; i++) d.set(25 + i * 3, 14, C.brass3); }
+    d.outline(C.void0);
+    PROPS[`drawer_${arm ? 'a' : '-'}${mod ? 'm' : '-'}`] = toStrings(d);
+  }
+}
+export function stripProp(len: number): string[] {
+  const r = new Raster(16, Math.max(2, len));
+  r.rect(2, 0, 11, len, C.steel5); r.rect(12, 0, 1, len, C.steel3);
+  for (let y = 3; y < len - 1; y += 4) { r.rect(3, y, 2 + ((y * 7) % 6), 1, C.void2); r.set(9 + (y % 3), y, C.amber2); }
+  r.rect(2, len - 1, 11, 1, C.steel3);
+  r.outline(C.void0);
+  return toStrings(r);
+}

@@ -34,6 +34,7 @@ export const HOTSPOTS: HotspotDef[] = [
   hs('ws_arm', 'arm assembly', 'workshop', [172, 102, 16, 12], [188, 134], { visible: (s) => has(s, 'drawerOpen') && !has(s, 'armTaken') }),
   hs('ws_module', 'positronic module', 'workshop', [190, 102, 16, 12], [188, 134], { visible: (s) => has(s, 'drawerOpen') && !has(s, 'moduleTaken') }),
   hs('ws_robot', 'maintenance robot', 'workshop', [207, 78, 34, 46], [224, 136]),
+  hs('ws_chainsaw', 'chainsaw', 'workshop', [34, 78, 24, 46], [46, 134]),
   hs('ws_intercom', 'intercom', 'workshop', [247, 60, 24, 34], [258, 134], { face: 1 }),
 
   // ---- Converter Chamber
@@ -50,6 +51,7 @@ export const HOTSPOTS: HotspotDef[] = [
   hs('qt_hatch', 'hatch to Assembly Workshop', 'quarters', [288, 34, 30, 90], [278, 140], { face: 1, exit: { to: 'workshop', x: 30, y: 138, face: 1 } }),
   hs('qt_bunks', 'bunks', 'quarters', [2, 42, 86, 82], [56, 136]),
   hs('qt_viewport', 'viewport', 'quarters', [96, 22, 58, 58], [128, 134]),
+  hs('qt_plant', 'Chuck the plant', 'quarters', [83, 86, 20, 38], [94, 136]),
   hs('qt_mug', 'mug', 'quarters', [98, 74, 14, 11], [104, 134], { visible: (s) => !has(s, 'mugTaken') && !has(s, 'mugGiven') }),
   hs('qt_sheet', 'technical reference sheet', 'quarters', [158, 24, 26, 34], [170, 134]),
   hs('qt_receiver', 'observation receiver', 'quarters', [150, 72, 36, 30], [166, 134]),

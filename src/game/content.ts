@@ -308,6 +308,14 @@ export const BEHAVIOURS: Record<string, Behaviour> = {
       },
     },
   },
+  ws_chainsaw: {
+    look: one('A chainsaw. Mike swears the station needs one. The tag on the handle reads: OUT OF GAS.'),
+    use: one('I pull the cord. It coughs once and gives up. No gas, and nothing on this station burns it.'),
+    pickup: one('Too heavy, too loud, and entirely empty. It stays.'),
+    open: one('The tank is open already. Bone dry.'),
+    talk: one('It has nothing to say. It has nothing to burn, either.'),
+    useWith: { mug: () => [P('Coffee is not gas. Probably.')] },
+  },
   ws_intercom: {
     look: one('The workshop intercom. It reaches every room, including Cutie\'s.'),
     pickup: one('It is part of the wall.'),
@@ -371,6 +379,14 @@ export const BEHAVIOURS: Record<string, Behaviour> = {
 
   // ---------------- quarters
   qt_hatch: { look: one('The hatch back to the workshop.') },
+  qt_plant: {
+    look: one('Chuck, the potted plant. Teal leaves, rust pot, a look of polite expectation. He has outlasted three shift crews.'),
+    talk: () => [P('How is the beam looking, Chuck?'), P('He says nothing, but he leans a little closer to the viewport.')],
+    pickup: one('Chuck stays. Mike would never forgive me.'),
+    use: one('I give his leaves a gentle pat. He seems fine.'),
+    open: one('He is a plant, not a cupboard.'),
+    give: { mug: () => [P('Chuck refuses the cold coffee, which says something about the coffee.')] },
+  },
   qt_bunks: {
     look: one('Two bunks. Mine is the one without a boot print on the pillow.'),
     use: one('Not now. There is a beam to watch.'),
@@ -585,7 +601,7 @@ export function resolve(s: GameState, verb: string, a: Ref, b?: Ref): Step[] {
 }
 
 /** Hotspots that can start a Give (valid recipients). */
-export const GIVE_TARGETS = new Set(['cv_cutie', 'qt_donovan']);
+export const GIVE_TARGETS = new Set(['cv_cutie', 'qt_donovan', 'qt_plant']);
 
 export const OPENING: Step[] = [
   say('donovan_ic', 'Greg, the electron storm reaches the beam in a few hours, and Cutie still will not take orders from us.'),

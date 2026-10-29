@@ -22,6 +22,7 @@ export class AudioEngine {
       const d = this.noiseBuf.getChannelData(0);
       for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
       this.startAmbience();
+      this.startMusic();
     } catch { this.ctx = undefined; }
   }
 
@@ -46,12 +47,13 @@ export class AudioEngine {
   setRoom(room: string) {
     if (!this.amb || !this.ctx) return;
     const t = this.ctx.currentTime;
-    const cfg = { workshop: [60, 320, 520, 0.05], converter: [48, 200, 260, 0.075], quarters: [72, 240, 700, 0.04] }[room] ?? [55, 260, 500, 0.05];
+    const cfg = { workshop: [60, 320, 520, 0.03], converter: [48, 200, 260, 0.045], quarters: [72, 240, 700, 0.025] }[room] ?? [55, 260, 500, 0.05];
     this.amb.hum.frequency.setTargetAtTime(cfg[0], t, 0.4);
     this.amb.hum2.frequency.setTargetAtTime(cfg[0] * 2.01, t, 0.4);
     this.amb.filt.frequency.setTargetAtTime(cfg[1], t, 0.4);
     this.amb.nfilt.frequency.setTargetAtTime(cfg[2], t, 0.4);
     this.amb.gain.gain.setTargetAtTime(cfg[3], t, 0.4);
+    this.roomDensity = { workshop: 0.5, converter: 0.35, quarters: 0.45 }[room] ?? 0.45;
   }
 
   private env(g: GainNode, t: number, a: number, peak: number, d: number) {
@@ -96,6 +98,69 @@ export class AudioEngine {
       case 'door': this.noise(t, 0.35, 0.28, 'lowpass', 700, 120); this.tone('sawtooth', 80, 50, t, 0.3, 0.1); break;
       default: break;
     }
+  }
+
+  // ---- generative music: slow minor pads, a soft bass and sparse echoing plucks
+  private musicBus?: GainNode;
+  private musicTimer = 0;
+  private nextBar = 0;
+  private bar = 0;
+  private roomDensity = 0.45;
+  private static CHORDS = [
+    [146.8, 174.6, 220, 329.6], // Dm9
+    [116.5, 146.8, 174.6, 220], // Bbmaj7
+    [196, 233.1, 293.7, 440], // Gm
+    [110, 146.8, 164.8, 196], // A7sus4
+  ];
+  private static PLUCK = [587.3, 698.5, 784, 880, 1046.5, 1174.7];
+
+  private startMusic() {
+    const c = this.ctx!;
+    const bus = c.createGain(); bus.gain.value = 0.9;
+    const dry = c.createGain(); dry.gain.value = 0.8;
+    const delay = c.createDelay(1.5); delay.delayTime.value = 0.62;
+    const fb = c.createGain(); fb.gain.value = 0.38;
+    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1800;
+    bus.connect(dry); dry.connect(this.master!);
+    bus.connect(delay); delay.connect(lp); lp.connect(fb); fb.connect(delay); lp.connect(this.master!);
+    this.musicBus = bus;
+    this.nextBar = c.currentTime + 0.3;
+    this.musicTimer = window.setInterval(() => this.scheduleMusic(), 300);
+  }
+
+  private scheduleMusic() {
+    const c = this.ctx!;
+    while (this.nextBar < c.currentTime + 1.2) {
+      const t = this.nextBar, chord = AudioEngine.CHORDS[this.bar % 4];
+      const barLen = 7;
+      for (const [i, f] of chord.entries()) this.padVoice(f, t + i * 0.12, barLen + 1.5, i === 0 ? 0.05 : 0.035);
+      this.padVoice(chord[0] / 2, t, barLen, 0.06);
+      for (let b = 0; b < 4; b++) {
+        if (Math.random() < this.roomDensity) {
+          const f = Math.random() < 0.6 ? chord[Math.floor(Math.random() * chord.length)] * 4 : AudioEngine.PLUCK[Math.floor(Math.random() * AudioEngine.PLUCK.length)];
+          this.pluck(f, t + b * (barLen / 4) + Math.random() * 0.3, 0.05);
+        }
+      }
+      this.nextBar += barLen;
+      this.bar++;
+    }
+  }
+  private padVoice(f: number, t: number, dur: number, vol: number) {
+    const c = this.ctx!;
+    const g = c.createGain(); const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900;
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + dur * 0.35); g.gain.linearRampToValueAtTime(0.0001, t + dur);
+    lp.connect(g); g.connect(this.musicBus!);
+    for (const [type, det] of [['triangle', -4], ['sine', 5]] as [OscillatorType, number][]) {
+      const o = c.createOscillator(); o.type = type; o.frequency.value = f; o.detune.value = det;
+      o.connect(lp); o.start(t); o.stop(t + dur + 0.1);
+    }
+  }
+  private pluck(f: number, t: number, vol: number) {
+    const c = this.ctx!;
+    const o = c.createOscillator(); const g = c.createGain();
+    o.type = 'triangle'; o.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.4);
+    o.connect(g); g.connect(this.musicBus!); o.start(t); o.stop(t + 1.5);
   }
 
   /** Four sparse notes. */

@@ -102,6 +102,14 @@ export function paintQuarters() {
   // mug stays in a runtime prop; bunk lamp
   bg.rect(86, 80, 3, 3, C.steel2);
 
+  // Chuck, the potted plant (teal foliage, rust pot, suspiciously attentive)
+  const px = 93;
+  for (const [x1, y1, w] of [[84, 98, 3], [101, 96, 3], [92, 88, 3], [86, 108, 2], [101, 107, 2], [97, 100, 2]] as [number, number, number][]) {
+    bg.line(px, 114, x1, y1, C.teal1, w); bg.ellipse(x1, y1, 4, 2.5, C.teal2); bg.set(x1 - 1, y1 - 1, C.teal3); bg.set(x1 + 1, y1, C.teal3);
+  }
+  bg.poly([[87, 114], [100, 114], [98, 124], [89, 124]], C.rust1); bg.rect(86, 113, 15, 3, C.rust0); bg.rect(86, 113, 15, 1, C.amber2);
+  bg.set(91, 119, C.void0); bg.set(96, 119, C.void0); bg.set(93, 121, C.void0); bg.set(94, 121, C.void0);
+
   // lighting
   bg.light(204, 40, 62, 0.9, 'warm', 1.1);
   bg.light(204, 120, 60, 0.7, 'warm', 0.4);

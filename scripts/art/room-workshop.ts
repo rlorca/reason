@@ -128,6 +128,16 @@ export function paintWorkshop() {
   // wall clock / gauge
   bg.ellipse(190, 40, 6, 6, C.brass2); bg.ellipse(190, 40, 5, 5, C.steel5); bg.line(190, 40, 190, 36, C.void1); bg.line(190, 40, 193, 41, C.void1);
 
+  // chainsaw leaning against the wall beside the bench (out of gas)
+  bg.rect(43, 80, 5, 30, C.steel4); bg.rect(43, 80, 1, 30, C.steel5); bg.rect(47, 80, 1, 30, C.steel2);
+  for (let y = 81; y < 108; y += 3) { bg.set(42, y, C.void2); bg.set(48, y, C.void2); }
+  bg.rect(38, 108, 16, 12, C.amber2); bg.rect(38, 108, 16, 2, C.amber3); bg.rect(38, 118, 16, 2, C.amber1);
+  bg.rect(40, 111, 6, 4, C.void1); bg.rect(48, 110, 4, 3, C.brass3); bg.set(49, 111, C.void1);
+  bg.rect(35, 106, 3, 12, C.void2); bg.rect(35, 106, 8, 2, C.void2);
+  bg.rect(50, 120, 3, 3, C.void2);
+  bg.rect(52, 100, 8, 6, C.steel5); bg.set(54, 102, C.void2); bg.set(55, 102, C.void2); bg.rect(54, 104, 4, 1, C.amber2); // tag: OUT OF GAS
+  bg.line(52, 106, 49, 111, C.void3);
+
   // lighting
   bg.light(108, 38, 62, 0.95, 'warm', 1.15);
   bg.light(222, 40, 68, 0.9, 'warm', 1.1);

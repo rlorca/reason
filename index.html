@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
   <meta name="theme-color" content="#06070c" />
   <title>REASON</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%2306070c'/%3E%3Crect x='3' y='3' width='10' height='10' fill='%23c8983a'/%3E%3Crect x='6' y='6' width='4' height='4' fill='%234bc8b0'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="/src/ui/style.css" />
 </head>
@@ -72,6 +77,7 @@
           <button id="btn-new" class="primary">Start</button>
           <button id="btn-restart-title" hidden>Restart</button>
         </div>
+        <p id="rotate-tip">&#8635; Best played in landscape. Turn your phone sideways.</p>
         <div class="howto">
           <p><b>Tap the floor</b> to walk. <b>Tap things</b> to look.</p>
           <p>Pick a <b>verb</b>, then an object. Items go with Use or Give.</p>
@@ -85,6 +91,8 @@
         <h2>Menu</h2>
         <button id="m-sound">Sound: on</button>
         <button id="m-motion">Reduced motion: off</button>
+        <button id="m-fullscreen">Full screen</button>
+        <p id="fs-note" class="small" hidden>On iPhone: Share &rarr; Add to Home Screen for full screen.</p>
         <button id="m-restart">Restart game</button>
         <button id="m-title">Return to title</button>
         <button id="m-close" class="primary">Resume</button>

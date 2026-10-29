@@ -1,0 +1,11 @@
+{
+  "name": "REASON",
+  "short_name": "REASON",
+  "description": "A Flickersoft point-and-click adventure after Isaac Asimov's story",
+  "start_url": ".",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#06070c",
+  "theme_color": "#06070c",
+  "icons": [{ "src": "icon-192.png", "sizes": "192x192", "type": "image/png" }]
+}

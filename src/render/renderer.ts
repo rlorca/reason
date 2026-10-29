@@ -17,6 +17,8 @@ export interface View {
   t: number;
   actors: Record<string, Actor>;
   botFace: 1 | -1;
+  camX: number;
+  viewW: number;
   stormT: number | null;
   reduced: boolean;
   selected: string | null; // selected close-up hotspot id
@@ -55,9 +57,11 @@ export class Renderer {
   }
 
   draw(v: View) {
+    if (this.canvas.width !== v.viewW) { this.canvas.width = v.viewW; this.ctx.imageSmoothingEnabled = false; }
     const ctx = this.ctx;
     ctx.save();
-    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 320, 180);
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, this.canvas.width, 180);
+    ctx.translate(-Math.round(v.camX), 0);
     const storm = v.stormT !== null;
     if (storm && !v.reduced) {
       const k = smooth(0.5, 3, v.stormT!) * (1 - smooth(9.5, 12, v.stormT!));

@@ -46,15 +46,27 @@ export class Game {
 
   async verb(v: string) { await this.press(this.page.locator(`#verbs [data-verb=${v}]`)); }
   async item(id: string) { await this.press(this.page.locator(`#inventory [data-item=${id}]`)); }
+  /** Narrow portrait scrolls the room: walk toward off-screen hotspots with real floor taps. */
+  async bringIntoView(id: string) {
+    for (let i = 0; i < 8; i++) {
+      const h = (await this.hotspots()).find((x) => x.id === id);
+      if (!h || h.click) return;
+      const bb = (await this.page.locator('#world').boundingBox())!;
+      const left = h.rect.x + h.rect.w / 2 < bb.x;
+      await this.tapAt(bb.x + bb.width * (left ? 0.08 : 0.92), bb.y + bb.height * 0.86);
+      await this.pump();
+    }
+  }
   async tap(id: string) {
+    await this.bringIntoView(id);
     const hs = await this.hotspots();
     const h = hs.find((x) => x.id === id);
     if (!h || !h.click) throw new Error(`hotspot ${id} not clickable; have ${hs.map((x) => x.id).join(',')}`);
     await this.tapAt(h.click[0], h.click[1]);
     return this.pump();
   }
-  async act(verb: string, id: string) { await this.verb(verb); return this.tap(id); }
-  async useItem(item: string, id: string) { await this.verb('use'); await this.item(item); return this.tap(id); }
+  async act(verb: string, id: string) { await this.bringIntoView(id); await this.verb(verb); return this.tap(id); }
+  async useItem(item: string, id: string) { await this.bringIntoView(id); await this.verb('use'); await this.item(item); return this.tap(id); }
   async choose(id: string) {
     await this.press(this.page.locator(`#choices [data-choice=${id}]`));
     return this.pump();

@@ -44,7 +44,11 @@ export class Engine {
   private botFaceOverride: 1 | -1 | null = null;
   private selectedBoard: string | null = null;
   private dragFrom: HotspotDef | null = null;
-  private legWalk: { x: number; y: number }[] = [];
+  camX = 0;
+  viewW = 320;
+  private prefView = 320;
+  private camManual = false;
+  private lastVw = 0;
 
   actors: Record<string, Actor> = {
     powell: this.mk('powell', 'powell', 150, 146, 1),
@@ -63,6 +67,9 @@ export class Engine {
     this.renderer = new Renderer(canvas, this.assets);
     this.reduced = (() => { try { const p = localStorage.getItem('reason.reduced'); if (p !== null) return p === '1'; } catch { /* ignore */ } return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false; })();
     try { this.audio.muted = localStorage.getItem('reason.muted') === '1'; } catch { /* ignore */ }
+    const mq = window.matchMedia('(max-width: 520px) and (orientation: portrait)');
+    this.prefView = mq.matches ? 200 : 320;
+    mq.addEventListener?.('change', () => { this.prefView = mq.matches ? 200 : 320; });
     this.bindCanvas(canvas);
     this.syncActors();
     let last = performance.now();
@@ -77,7 +84,7 @@ export class Engine {
 
   // ------------------------------------------------------------------ view and loop
   private view(): View {
-    return { scene: this.scene, state: this.state, t: this.t, actors: this.actors, botFace: this.botFace(), stormT: this.stormT, reduced: this.reduced, selected: this.selectedBoard };
+    return { scene: this.scene, state: this.state, t: this.t, actors: this.actors, botFace: this.botFace(), camX: this.camX, viewW: this.viewW, stormT: this.stormT, reduced: this.reduced, selected: this.selectedBoard };
   }
   private botFace(): 1 | -1 {
     if (this.botFaceOverride) return this.botFaceOverride;
@@ -85,8 +92,23 @@ export class Engine {
     return this.actors.powell.x >= BOT_POS[0] ? 1 : -1;
   }
 
+  private updateCamera(dt: number, snap = false) {
+    this.viewW = this.scene === 'board' ? 320 : this.prefView;
+    const max = 320 - this.viewW;
+    if (this.viewW === 320) this.camX = 0;
+    else if (!this.camManual || snap) {
+      const target = Math.max(0, Math.min(max, this.actors.powell.x - this.viewW / 2));
+      this.camX = snap ? target : this.camX + (target - this.camX) * Math.min(1, dt * 6);
+    }
+    this.camX = Math.max(0, Math.min(max, this.camX));
+    if (this.viewW !== this.lastVw) document.documentElement.style.setProperty('--vw', String(this.viewW));
+    this.ui.setCamera(this.camX, this.viewW, this.viewW !== this.lastVw);
+    this.lastVw = this.viewW;
+  }
+
   private update(dt: number) {
     this.t += dt;
+    this.updateCamera(dt);
     const p = this.actors.powell;
     if (this.inGame && this.path.length && this.scene !== 'board') {
       const [tx, ty] = this.path[0];
@@ -94,7 +116,7 @@ export class Engine {
       const step = this.speed * dt;
       if (d <= step) { p.x = tx; p.y = ty; this.path.shift(); } else { p.x += (dx / d) * step; p.y += (dy / d) * step; }
       if (Math.abs(dx) > 0.5) p.face = dx > 0 ? 1 : -1;
-      p.walking = true; p.walkT += dt;
+      p.walking = true; p.walkT += dt; this.camManual = false;
       const f = Math.floor(p.walkT * 9) % 6;
       if ((f === 0 || f === 3) && f !== this.lastStep) this.audio.play('step');
       this.lastStep = f;
@@ -152,9 +174,9 @@ export class Engine {
 
   // ------------------------------------------------------------------ input
   private bindCanvas(canvas: HTMLCanvasElement) {
-    let down: { x: number; y: number; t: number } | null = null;
+    let down: { x: number; y: number; t: number; lx: number } | null = null;
     canvas.addEventListener('pointerdown', (e) => {
-      down = { x: e.clientX, y: e.clientY, t: performance.now() };
+      down = { x: e.clientX, y: e.clientY, t: performance.now(), lx: e.clientX };
       const w = this.toWorld(e.clientX, e.clientY);
       this.dragFrom = this.scene === 'board' ? this.hotspotAt(w[0], w[1]) : null;
     });
@@ -173,6 +195,12 @@ export class Engine {
     });
     canvas.addEventListener('pointercancel', () => { down = null; this.dragFrom = null; });
     canvas.addEventListener('pointermove', (e) => {
+      if (down && this.viewW < 320 && !this.dragFrom?.usable && Math.hypot(e.clientX - down.x, e.clientY - down.y) > 14) {
+        const r = canvas.getBoundingClientRect();
+        this.camX = Math.max(0, Math.min(320 - this.viewW, this.camX - ((e.clientX - down.lx) / r.width) * this.viewW));
+        this.camManual = true;
+      }
+      if (down) down.lx = e.clientX;
       if (e.pointerType !== 'mouse') return;
       const w = this.toWorld(e.clientX, e.clientY);
       const h = this.inGame && !this.busy ? this.hotspotAt(w[0], w[1]) : null;
@@ -188,16 +216,16 @@ export class Engine {
 
   toWorld(cx: number, cy: number): [number, number] {
     const r = this.ui.canvas.getBoundingClientRect();
-    return [((cx - r.left) / r.width) * 320, ((cy - r.top) / r.height) * 180];
+    return [this.camX + ((cx - r.left) / r.width) * this.viewW, ((cy - r.top) / r.height) * 180];
   }
   toScreen(x: number, y: number): [number, number] {
     const r = this.ui.canvas.getBoundingClientRect();
-    return [r.left + (x / 320) * r.width, r.top + (y / 180) * r.height];
+    return [r.left + ((x - this.camX) / this.viewW) * r.width, r.top + (y / 180) * r.height];
   }
 
   hotspotAt(wx: number, wy: number): HotspotDef | null {
     const list = hotspotsIn(this.scene, this.state);
-    const scale = this.ui.canvas.getBoundingClientRect().width / 320;
+    const scale = this.ui.canvas.getBoundingClientRect().width / this.viewW;
     const inner: HotspotDef[] = [];
     const outer: { h: HotspotDef; d: number }[] = [];
     for (const h of list) {
@@ -405,7 +433,7 @@ export class Engine {
     this.scene = st.to;
     const p = this.actors.powell;
     p.x = st.x; p.y = st.y; p.face = st.face; p.walking = false;
-    this.path = []; this.hover = null;
+    this.path = []; this.hover = null; this.camManual = false; this.updateCamera(0, true);
     this.pending = { verb: null }; this.ui.setVerb(null); this.ui.renderInventory(this.state.inv, null);
     this.donovanPlaced = false;
     this.syncActors();
@@ -537,6 +565,7 @@ export class Engine {
   async startGame(fresh: boolean) {
     this.audio.init();
     this.audio.setMuted(this.audio.muted);
+    if (window.matchMedia('(pointer: coarse)').matches && !document.fullscreenElement && (document.documentElement as any).requestFullscreen) void this.goFullscreen();
     this.gen++;
     this.busy = true; this.ui.setBusy(true); this.ui.setDialogue(false); this.stormStop();
     const saved = fresh ? null : load();
@@ -551,8 +580,10 @@ export class Engine {
     this.inGame = true;
     this.ui.showTitle(false);
     this.syncActors();
+    this.camManual = false; this.updateCamera(0, true);
     this.refreshHud();
     await this.ui.fade(false, 200);
+    if (window.matchMedia('(pointer: coarse) and (orientation: portrait)').matches) this.ui.toast('Tip: turn your phone sideways for a bigger view', 6000);
     if (!resumed) { void this.runScript(OPENING); } else { this.busy = false; this.ui.setBusy(false); this.ui.toast('Welcome back'); this.ui.setIdle(objectiveText(this.state)); }
   }
   private stormStop() { this.stormT = null; this.audio.stormStop(); this.audio.printStop(); this.ui.showSkip(false); this.ui.setBanner(null); }
@@ -569,6 +600,16 @@ export class Engine {
   }
   restartGame() { void this.startGame(true); }
 
+  /** Ask the browser for full screen (not available on iPhone Safari) and landscape. */
+  async goFullscreen() {
+    const el = document.documentElement as any;
+    try {
+      if (!document.fullscreenElement && el.requestFullscreen) {
+        await el.requestFullscreen({ navigationUI: 'hide' });
+        await (screen.orientation as any)?.lock?.('landscape').catch(() => {});
+      } else if (document.fullscreenElement) await document.exitFullscreen();
+    } catch { /* refused or unsupported */ }
+  }
   toggleSound() {
     this.audio.init();
     this.audio.setMuted(!this.audio.muted);
@@ -594,7 +635,7 @@ export class Engine {
           let click: [number, number] | null = null;
           const tries: [number, number][] = [];
           for (const fy of [0.5, 0.3, 0.7, 0.15, 0.85]) for (const fx of [0.5, 0.3, 0.7, 0.15, 0.85]) tries.push([x + w * fx, y + hh * fy]);
-          for (const [tx, ty] of tries) if (self.hotspotAt(tx, ty)?.id === h.id) { const [cx, cy] = self.toScreen(tx, ty); click = [cx, cy]; break; }
+          for (const [tx, ty] of tries) if (tx >= self.camX + 4 && tx <= self.camX + self.viewW - 4 && self.hotspotAt(tx, ty)?.id === h.id) { const [cx, cy] = self.toScreen(tx, ty); click = [cx, cy]; break; }
           out.push({ id: h.id, name: h.name, scene: h.scene, rect: { x: sx, y: sy, w: ex - sx, h: ey - sy }, click });
         }
         return out;

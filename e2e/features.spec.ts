@@ -32,6 +32,7 @@ test('hints escalate, sound off, save/reload continue, restart, orientation chan
   await g.shot('reveal');
   await g.press(page.locator('#btn-reveal'));
   // change orientation mid-game: layout adapts and hotspots still hit
+  await page.evaluate(() => document.fullscreenElement && document.exitFullscreen());
   const vp = page.viewportSize()!;
   await page.setViewportSize({ width: vp.height, height: vp.width });
   await overflowFree(g);

@@ -36,6 +36,9 @@ export class UI {
     $('btn-continue').addEventListener('click', () => void engine.startGame(false));
     $('btn-new').addEventListener('click', () => void engine.startGame(true));
     $('btn-restart-title').addEventListener('click', () => void engine.startGame(true));
+    const fs = (document.documentElement as any).requestFullscreen && document.fullscreenEnabled !== false;
+    $('m-fullscreen').hidden = !fs; $('fs-note').hidden = !!fs || !window.matchMedia('(pointer: coarse)').matches;
+    $('m-fullscreen').addEventListener('click', () => { void engine.goFullscreen(); this.showMenu(false); });
     $('m-close').addEventListener('click', () => this.showMenu(false));
     $('m-sound').addEventListener('click', () => engine.toggleSound());
     $('m-motion').addEventListener('click', () => engine.toggleMotion());
@@ -123,6 +126,16 @@ export class UI {
   setMotion(reduced: boolean) {
     $('m-motion').textContent = `Reduced motion: ${reduced ? 'on' : 'off'}`;
     document.body.classList.toggle('reduced-motion', reduced);
+  }
+
+  private camKey = '';
+  setCamera(camX: number, viewW: number, force: boolean) {
+    const key = `${Math.round(camX * 4)}:${viewW}`;
+    if (key === this.camKey && !force) return;
+    this.camKey = key;
+    const l = this.el.labels;
+    l.style.width = `${(320 / viewW) * 100}%`;
+    l.style.transform = `translateX(${-(camX / 320) * 100}%)`;
   }
 
   // --- labels (hotspot reveal, close-up labels, tap feedback)

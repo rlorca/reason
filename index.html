@@ -13,7 +13,14 @@
     <div id="stage">
       <canvas id="world" width="320" height="180" aria-label="Game scene"></canvas>
       <div id="labels" aria-hidden="true"></div>
-      <div id="toolbar">
+      <button id="btn-back" hidden>&#9664; Back to the room</button>
+      <button id="btn-skip" hidden>Skip &#9654;&#9654;</button>
+      <div id="banner" hidden></div>
+      <div id="toast" role="status" aria-live="polite"></div>
+      <div id="fade"></div>
+    </div>
+
+    <div id="toolbar">
         <button id="btn-reveal" class="tool" aria-label="Reveal hotspots" aria-pressed="false" title="Reveal hotspots">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/></svg>
         </button>
@@ -27,12 +34,6 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
         </button>
       </div>
-      <button id="btn-back" hidden>&#9664; Back to the room</button>
-      <button id="btn-skip" hidden>Skip &#9654;&#9654;</button>
-      <div id="banner" hidden></div>
-      <div id="toast" role="status" aria-live="polite"></div>
-      <div id="fade"></div>
-    </div>
 
     <div id="caption" role="log" aria-live="polite">
       <div id="speaker"></div>

@@ -113,7 +113,7 @@ export class UI {
   }
   setBanner(text: string | null) { this.el.banner.hidden = !text; if (text) this.el.banner.textContent = text; }
   showSkip(on: boolean) { this.el.skip.hidden = !on; }
-  setBack(on: boolean) { this.el.back.hidden = !on; }
+  setBack(on: boolean) { this.el.back.hidden = !on; this.el.app.dataset.scene = on ? 'board' : 'room'; }
   setReveal(on: boolean) { $('btn-reveal').setAttribute('aria-pressed', String(on)); }
   setSound(muted: boolean) {
     $('btn-sound').setAttribute('aria-pressed', String(muted));
@@ -137,7 +137,8 @@ export class UI {
     const flags = this.engine.state.flags;
     const list = [...this.chipsShown];
     if (this.flashed && !list.some((c) => c.h.id === this.flashed!.id)) list.push({ h: this.flashed, rect: this.flashed.dynRect ? this.flashed.dynRect(this.engine.state) : this.flashed.rect });
-    for (const { h, rect } of list) {
+    list.sort((a, b) => a.rect[0] - b.rect[0]);
+    list.forEach(({ h, rect }, idx) => {
       const [x, y, w, hh] = rect;
       if (h.scene !== 'board' && this.engine.reveal) {
         const o = document.createElement('div');
@@ -147,7 +148,7 @@ export class UI {
       }
       const c = document.createElement('div');
       c.className = 'chip' + (h.scene === 'board' ? ' board' : '');
-      let text = h.name;
+      let text = h.exit ? h.name.replace(/^(door|hatch) to /, '\u2192 ') : h.name;
       if (h.scene === 'board') {
         const mark = { cu_storm: '▲ ', cu_dir: '■ ', cu_focus: '● ', cu_ref_dir: '■ ', cu_ref_focus: '● ' }[h.id] ?? '';
         text = mark + h.name.replace(/^./, (m) => m.toUpperCase());
@@ -155,12 +156,17 @@ export class UI {
         if (this.engine.pending.a?.id === h.id) c.classList.add('selected');
       }
       c.textContent = text;
-      const cx = x + w / 2, top = h.scene === 'board' ? y - 1 : Math.max(8, y);
-      c.style.left = `${Math.max(14, Math.min(86, (cx / 320) * 100))}%`;
-      c.style.top = `${Math.max(7, (top / 180) * 100)}%`;
-      if (h.scene === 'board' && (h.id === 'cu_ref_dir' || h.id === 'cu_ref_focus')) c.style.top = `${((y + 8) / 180) * 100}%`;
+      if (h.scene === 'board') {
+        c.style.transform = 'none';
+        c.style.left = `${((x + 4) / 320) * 100}%`;
+        c.style.top = `${((y + 3) / 180) * 100}%`;
+      } else {
+        const cx = x + w / 2, top = Math.max(8, y);
+        c.style.left = `${Math.max(14, Math.min(86, (cx / 320) * 100))}%`;
+        c.style.top = `${Math.max(7, (top / 180) * 100) + (this.engine.reveal ? (idx % 3) * 8 : 0)}%`;
+      }
       box.appendChild(c);
-    }
+    });
   }
 
   // --- overlays

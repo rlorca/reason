@@ -148,3 +148,5 @@ body.reduced-motion #more { animation: none; }
 
 #splash { z-index: 40; background: #000; cursor: pointer; }
 #splash canvas { width: min(92vw, 760px); image-rendering: pixelated; aspect-ratio: 80 / 34; }
+#app[data-scene=board] #toolbar { display: none; }
+.chip.board { font-size: 12px; padding: 1px 5px; }

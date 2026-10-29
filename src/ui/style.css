@@ -163,3 +163,6 @@ body.reduced-motion #more { animation: none; }
 
 #rotate-tip, #fs-tip { display: none; }
 @media (pointer: coarse) and (orientation: portrait) { #rotate-tip { display: block; color: var(--amber3); font-size: 15px; margin: 8px 0 0; } }
+#ios-tip { color: var(--amber3); font-size: 14px; line-height: 1.4; margin: 8px 0 0; }
+#ios-tip b { color: var(--amber4); }
+@media (orientation: landscape) and (max-height: 520px) { #ios-tip { font-size: 12px; margin: 2px 0 0; } }

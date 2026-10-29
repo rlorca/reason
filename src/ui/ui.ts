@@ -36,6 +36,9 @@ export class UI {
     $('btn-continue').addEventListener('click', () => void engine.startGame(false));
     $('btn-new').addEventListener('click', () => void engine.startGame(true));
     $('btn-restart-title').addEventListener('click', () => void engine.startGame(true));
+    const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const standalone = (navigator as any).standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+    $('ios-tip').hidden = !(ios && !standalone);
     const fs = (document.documentElement as any).requestFullscreen && document.fullscreenEnabled !== false;
     $('m-fullscreen').hidden = !fs; $('fs-note').hidden = !!fs || !window.matchMedia('(pointer: coarse)').matches;
     $('m-fullscreen').addEventListener('click', () => { void engine.goFullscreen(); this.showMenu(false); });

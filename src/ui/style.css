@@ -110,8 +110,9 @@ button:focus-visible { outline: 3px solid var(--amber3); outline-offset: 2px; }
 .title-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px; }
 .title-actions button { min-width: 140px; min-height: 48px; }
 .primary { background: var(--brass3) !important; color: var(--void0) !important; border-color: var(--brass4) !important; }
-.howto { list-style: none; padding: 0; margin: 0; text-align: left; font-size: 15px; line-height: 1.4; color: var(--steel4); background: rgba(6, 7, 12, 0.7); border: 2px solid var(--brass1); padding: 10px 14px; }
-.howto li + li { margin-top: 4px; }
+.howto { text-align: center; font-size: 14px; line-height: 1.5; color: var(--steel2); margin-top: 6px; }
+.howto p { margin: 2px 0; }
+.howto b { color: var(--steel4); font-weight: normal; }
 .sheet { background: var(--void2); border: 3px solid var(--brass2); padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: min(320px, 90vw); }
 .sheet h2 { margin: 0 0 4px; color: var(--brass4); }
 .credits-box { max-width: 560px; padding: 20px; text-align: center; display: flex; flex-direction: column; gap: 16px; align-items: center; }
@@ -150,3 +151,11 @@ body.reduced-motion #more { animation: none; }
 #splash { z-index: 40; background: #000; cursor: pointer; }
 #splash canvas { width: min(92vw, 760px); image-rendering: pixelated; aspect-ratio: 80 / 34; }
 .chip.board { font-size: 12px; padding: 1px 5px; }
+
+/* narrow portrait: keep the key art whole instead of cropping it */
+@media (max-aspect-ratio: 4 / 5) {
+  .title-art { background-size: 100% auto; background-position: center calc(var(--safe-t) + 20vh); opacity: 1; }
+  .title-art::after { background: linear-gradient(to bottom, rgba(6, 7, 12, 0) calc(var(--safe-t) + 20vh + 28vw), var(--void0) calc(var(--safe-t) + 20vh + 56vw)); }
+  #title { align-items: start; }
+  .title-box { align-self: start; margin-top: calc(var(--safe-t) + 20vh + 42vw); padding-bottom: 22px; }
+}

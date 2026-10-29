@@ -1,0 +1,23 @@
+{
+  "name": "reason",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "REASON - a point-and-click adventure adapted from Isaac Asimov's 'Reason'",
+  "scripts": {
+    "art": "tsx scripts/build-art.ts",
+    "dev": "npm run art && vite",
+    "build": "npm run art && tsc --noEmit && vite build",
+    "preview": "vite preview --port 4173 --strictPort",
+    "test": "vitest run",
+    "e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
+  }
+}

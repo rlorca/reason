@@ -1,0 +1,11 @@
+import { Raster } from '../../src/art/raster';
+import { C } from '../../src/art/palette';
+import { writePng } from './png';
+const which = process.argv[2];
+const out = process.argv[3];
+const mod = await import(`./room-${which}.ts`);
+const fn = Object.values(mod).find((v) => typeof v === 'function' && (v as Function).name.startsWith('paint')) as () => { bg: Raster; fg: Raster };
+const { bg, fg } = fn();
+const comp = new Raster(320, 180, C.void3);
+comp.blit(bg, 0, 0); comp.blit(fg, 0, 0);
+writePng(out, comp, 3);
